@@ -48,10 +48,18 @@ function main(): void {
   writeFileSync(outPath, TIP, "utf8");
 
   // Read back and verify: the file on disk must match the tip exactly,
-  // so a silent write failure can never pass unnoticed.
+  // so a silent write failure can never pass unnoticed. The byte length
+  // is checked too, which catches any encoding surprise on disk.
   const back = readFileSync(outPath, "utf8");
   if (back !== TIP) {
     fail("read-back mismatch: entry.txt does not match the tip");
+  }
+  const expectedBytes = Buffer.byteLength(TIP, "utf8");
+  const actualBytes = Buffer.byteLength(back, "utf8");
+  if (actualBytes !== expectedBytes) {
+    fail(
+      `byte length mismatch: entry.txt is ${actualBytes} bytes, expected ${expectedBytes}`,
+    );
   }
   console.log(`wrote ${outPath} (${TIP.length} characters)`);
 }
